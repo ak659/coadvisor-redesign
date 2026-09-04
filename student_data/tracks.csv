@@ -1,0 +1,11 @@
+track_id,degree_id,track_name,blurb
+cs_swe,cs,Software Engineering,"Designing, building, and shipping reliable software at scale."
+cs_ai,cs,Artificial Intelligence,"Machine learning, reasoning systems, and intelligent agents."
+ds_ml,ds,Machine Learning,"Predictive modeling, model evaluation, and applied ML."
+ds_de,ds,Data Engineering,"Pipelines, distributed data infrastructure, and scalable systems."
+bus_mkt,bus,Marketing Analytics,"Consumer data, campaign analysis, and growth strategy."
+bus_fin,bus,Finance,"Corporate finance, valuation, and investment analysis."
+psych_clin,psych,Clinical Psychology,"Assessment, therapy foundations, and mental health practice."
+psych_cog,psych,Cognitive Science,"Perception, memory, and the computational study of mind."
+bio_mol,bio,Molecular Biology,"Genetics, biochemistry, and life at the cellular level."
+bio_eco,bio,Ecology & Environmental Science,"Ecosystems, conservation, and environmental change."

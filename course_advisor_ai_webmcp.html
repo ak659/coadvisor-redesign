@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoAdvisor.AI — WebMCP</title>
+<style>
+  :root {
+    --ink: #1b2430;
+    --paper: #f6f4ee;
+    --line: #d8d3c4;
+    --accent: #2c5f4f;
+    --accent-soft: #e4ede9;
+    --agent: #7a4b8a;
+    --agent-soft: #f0e6f4;
+    --danger: #9c3b3b;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --serif: 'Iowan Old Style', 'Georgia', serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    line-height: 1.5;
+  }
+  header {
+    padding: 2rem 2rem 1.2rem;
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 {
+    margin: 0 0 0.2rem;
+    font-size: 1.9rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  header p {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6b6455;
+  }
+  main {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 2.5rem;
+  }
+  @media (max-width: 760px) {
+    main { grid-template-columns: 1fr; }
+  }
+  section h2 {
+    font-size: 1.05rem;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b6455;
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 0.5rem;
+  }
+  .plan-card, .log-entry {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 3px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.7rem;
+  }
+  .plan-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .plan-card .meta {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: #8a8372;
+    margin-top: 0.2rem;
+  }
+  .plan-card button {
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    background: none;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 3px;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .plan-card button:hover { background: var(--danger); color: #fff; }
+
+  .log-entry {
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+  }
+  .log-entry .actor {
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .actor.human { background: var(--accent-soft); color: var(--accent); }
+  .actor.agent { background: var(--agent-soft); color: var(--agent); }
+  .log-entry .txt { color: #4a4438; }
+  .log-entry .time { margin-left: auto; color: #a89f8a; flex-shrink: 0; }
+
+  .advisor-note {
+    border-left: 3px solid var(--agent);
+    background: var(--agent-soft);
+    padding: 0.7rem 0.9rem;
+    border-radius: 0 3px 3px 0;
+    margin-bottom: 0.7rem;
+    font-size: 0.88rem;
+  }
+  .advisor-note .tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--agent);
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .empty {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: #a89f8a;
+    padding: 1rem 0;
+  }
+  #catalogList {
+    min-height: 400px;
+  }
+
+  footer {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 2rem 3rem;
+  }
+  footer h2 {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b6455;
+  }
+  pre {
+    background: #23201a;
+    color: #e8e2d0;
+    padding: 1rem 1.2rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.76rem;
+    line-height: 1.55;
+    font-family: var(--mono);
+  }
+  .status {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 3px;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+  .status.ok { background: var(--accent-soft); color: var(--accent); }
+  .status.off { background: #f2e6e6; color: var(--danger); }
+</style>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@mcp-b/webmcp-polyfill@latest/dist/index.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>CoAdvisor.AI</h1>
+  <p>Course planning — student &amp; agent, shared plan</p>
+</header>
+
+<main>
+  <section>
+    <h2>Current Plan</h2>
+    <div id="status" class="status off">Checking for WebMCP support…</div>
+    <div id="planList"></div>
+  </section>
+
+  <section>
+    <h2>Browse Catalog</h2>
+    <div style="margin-bottom: 0.8rem;">
+      <select id="degreeSelect" style="font-family: var(--mono); font-size: 0.8rem; padding: 0.4rem; margin-right: 0.5rem;"></select>
+      <select id="trackSelect" style="font-family: var(--mono); font-size: 0.8rem; padding: 0.4rem;"></select>
+    </div>
+    <div id="catalogList"></div>
+  </section>
+
+
+
+  <section>
+    <h2>Session Log</h2>
+    <div id="logList"></div>
+  </section>
+</main>
+
+
+
+<script type="module">
+  import { DEGREES, COURSE_INDEX, getPathCourses, getPathCredits } from '/static/catalog.js';
+  window.DEGREES = DEGREES;
+  window.COURSE_INDEX = COURSE_INDEX;
+  window.getPathCourses = getPathCourses;
+  window.getPathCredits = getPathCredits;
+</script>
+
+<script>
+
+  // ---------------------------------------------------------------
+// App state lives in MongoDB (see app.py / db.py), keyed by
+// CURRENT_USER_ID — a per-browser session ID stored in
+// localStorage (no login required). Plans, session log entries,
+// and advisor notes all persist across reloads via the backend.
+// ---------------------------------------------------------------
+
+// session_id instead until real auth is built
+function getOrCreateSessionId() {
+  let id = localStorage.getItem("coadvisor_user_id");
+  if (!id) {
+    id = "user_" + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem("coadvisor_user_id", id);
+  }
+  return id;
+}
+const CURRENT_USER_ID = getOrCreateSessionId();
+
+
+
+async function refreshPlanDisplay() {
+  const data = await fetch(`/api/plan/${CURRENT_USER_ID}`).then(r => r.json());
+  const planItems = data.plan; // array of {user_id, course_id, added_by, added_at}
+
+  const planEl = document.getElementById("planList");
+  planEl.innerHTML = "";
+
+  if (planItems.length === 0) {
+    planEl.innerHTML = '<div class="empty">No courses added yet.</div>';
+    return;
+  }
+
+  planItems.forEach(item => {
+    const course = COURSE_INDEX[item.course_id]; // REPLACED CATALOG with course_index for title/credits lookup
+    const div = document.createElement("div");
+    div.className = "plan-card";
+    div.innerHTML = `
+      <div>
+        <strong>${item.course_id}</strong> — ${course ? course.title : "(unknown course)"}
+        <div class="meta">${course ? course.credits : "?"} credits · added by ${item.added_by}</div>
+      </div>
+      <button onclick="removeFromPlan('${item.course_id}', 'human')">Remove</button>
+    `;
+    planEl.appendChild(div);
+  });
+}
+
+//(fetches + renders real advisor notes)
+async function refreshNotesDisplay() {
+  const notesData = await fetch(`/api/notes/${CURRENT_USER_ID}`).then(r => r.json());
+  const planData = await fetch(`/api/plan/${CURRENT_USER_ID}`).then(r => r.json());
+
+  const currentPlanIds = new Set(planData.plan.map(item => item.course_id));
+
+  // A note is still "live" if every course_id it references is still in the plan.
+  // Conflict notes reference two courses ("X / Y"); single-course notes reference one.
+  const activeNotes = notesData.notes.filter(n => {
+    const referencedIds = n.course_id.split(" / ").map(s => s.trim());
+    return referencedIds.every(id => currentPlanIds.has(id));
+  });
+
+  const planEl = document.getElementById("planList");
+  planEl.querySelectorAll(".advisor-note").forEach(el => el.remove());
+
+  activeNotes.forEach(n => {
+    const div = document.createElement("div");
+    div.className = "advisor-note";
+    div.innerHTML = `<span class="tag">Agent note · ${n.course_id}</span>${n.note_text}`;
+    planEl.prepend(div);
+  });
+}
+
+//(fetches + renders real session log)
+async function refreshLogDisplay() {
+  const data = await fetch(`/api/log/${CURRENT_USER_ID}`).then(r => r.json());
+  const entries = data.log; // already sorted newest-first by the backend
+
+  const logEl = document.getElementById("logList");
+  logEl.innerHTML = "";
+
+  if (entries.length === 0) {
+    logEl.innerHTML = '<div class="empty">No activity yet.</div>';
+    return;
+  }
+
+  entries.forEach(entry => {
+    const div = document.createElement("div");
+    div.className = "log-entry";
+    const time = new Date(entry.created_at).toLocaleTimeString();
+    div.innerHTML = `
+      <span class="actor ${entry.actor}">${entry.actor}</span>
+      <span class="txt">${entry.detail}</span>
+      <span class="time">${time}</span>
+    `;
+    logEl.appendChild(div);
+  });
+}
+
+
+//Updating logEvent to call the real backend now
+async function logEvent(actor, detail) {
+  await fetch("/api/log/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: CURRENT_USER_ID, actor, action: "event", detail })
+  });
+  await refreshLogDisplay();
+}
+
+// functions to populate dropdowns and render courses
+function populateDegreeDropdown() {
+  const degreeSelect = document.getElementById("degreeSelect");
+  degreeSelect.innerHTML = '<option value="">Select a degree…</option>';
+  Object.keys(DEGREES).forEach(degreeName => {
+    const opt = document.createElement("option");
+    opt.value = degreeName;
+    opt.textContent = degreeName;
+    degreeSelect.appendChild(opt);
+  });
+}
+
+function populateTrackDropdown(degreeName) {
+  const trackSelect = document.getElementById("trackSelect");
+  trackSelect.innerHTML = '<option value="">Core curriculum only</option>';
+  if (!degreeName || !DEGREES[degreeName]) return;
+
+  Object.keys(DEGREES[degreeName].tracks).forEach(trackName => {
+    const opt = document.createElement("option");
+    opt.value = trackName;
+    opt.textContent = trackName;
+    trackSelect.appendChild(opt);
+  });
+}
+
+async function renderCatalogBrowser() {
+  const degreeName = document.getElementById("degreeSelect").value;
+  const trackName = document.getElementById("trackSelect").value;
+  const catalogEl = document.getElementById("catalogList");
+
+  if (!degreeName) {
+    catalogEl.innerHTML = '<div class="empty">Select a degree above to browse courses.</div>';
+    return;
+  }
+
+  const courseIds = getPathCourses(degreeName, trackName || null);
+  const planData = await fetch(`/api/plan/${CURRENT_USER_ID}`).then(r => r.json());
+  const inPlan = new Set(planData.plan.map(item => item.course_id));
+
+  // Build the new HTML as a string first — no DOM changes yet
+  let newHtml = "";
+  courseIds.forEach(courseId => {
+    const course = COURSE_INDEX[courseId];
+    const alreadyAdded = inPlan.has(courseId);
+    newHtml += `
+      <div class="plan-card">
+        <div>
+          <strong>${course.id}</strong> — ${course.title}
+          <div class="meta">${course.credits} credits · ${course.level}${course.track ? " · " + course.track : ""}</div>
+        </div>
+        <button ${alreadyAdded ? "disabled" : ""} onclick="addToPlan('${course.id}', 'human')">
+          ${alreadyAdded ? "In plan" : "Add to Plan"}
+        </button>
+      </div>
+    `;
+  });
+
+  // Swap it in all at once, after the fetch resolved
+  catalogEl.innerHTML = newHtml;
+}
+// end drop down functions
+
+// ---------------------------------------------------------------
+// Shared tool implementations. Each one is callable both by a
+// WebMCP agent (via navigator.modelContext.registerTool) and by
+// the human through ordinary UI buttons — same function, two
+// callers. That symmetry is what makes this a *shared* surface
+// rather than a chat sidebar bolted onto a static page.
+// ---------------------------------------------------------------
+
+async function addToPlan(course_id, actor = "agent") {
+  const response = await fetch("/api/plan/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: CURRENT_USER_ID, course_id, actor })
+  });
+  const result = await response.json();
+
+  if (result.ok) {
+   await Promise.all([
+    refreshPlanDisplay(),
+    renderCatalogBrowser(),
+    refreshLogDisplay(),
+  ]);
+  }
+
+  return result;
+}
+
+async function removeFromPlan(course_id, actor = "agent") {
+  const response = await fetch("/api/plan/remove", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: CURRENT_USER_ID, course_id, actor })
+  });
+  const result = await response.json();
+
+  if (result.ok) {
+   await Promise.all([
+    refreshPlanDisplay(),
+    refreshLogDisplay(),
+    renderCatalogBrowser()
+  ]);
+  }
+
+  return result;
+}
+
+async function checkPrerequisites(course_id) {
+  const course = COURSE_INDEX[course_id];
+  if (!course) return { ok: false, error: `Unknown course_id: ${course_id}` };
+
+  // pull the REAL plan from the backend, not local state
+  const data = await fetch(`/api/plan/${CURRENT_USER_ID}`).then(r => r.json());
+  const completed = data.plan.map(item => item.course_id);
+
+  const missing = course.prereqs.filter(p => !completed.includes(p));
+  const result = {
+    ok: true,
+    course_id,
+    satisfied: missing.length === 0,
+    missing_prereqs: missing,
+  };
+
+  await logEvent("agent", `Checked prerequisites for ${course_id}: ${result.satisfied ? "satisfied" : "missing " + missing.join(", ")}`);
+  return result;
+}
+
+async function flagConflict(course_id_a, course_id_b, reason) {
+  const response = await fetch("/api/notes/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: CURRENT_USER_ID,
+      course_id: `${course_id_a} / ${course_id_b}`,
+      text: `Conflict flagged: ${reason}`
+    })
+  });
+  const result = await response.json();
+  if (result.ok) {
+    await refreshNotesDisplay();
+  }
+  return result;
+}
+
+
+async function checkFeasibility(student_id, degree, track) {
+  const student = await fetch(`/api/students/${student_id}`).then(r => r.json());
+  if (student.detail) {
+    return { ok: false, error: student.detail }; // 404 case
+  }
+
+  const path = getPathCourses(degree, track);
+  const completed = new Set(student.completed_courses);
+
+  const reachable = new Set(completed); // start with what's already done
+  const blocked = [];
+  const remaining = [];
+
+  path.forEach(courseId => {
+    if (completed.has(courseId)) return; // already done, skip
+
+    const course = COURSE_INDEX[courseId];
+    const missingPrereqs = course.prereqs.filter(p => !reachable.has(p));
+
+    if (missingPrereqs.length === 0) {
+      reachable.add(courseId); // will become reachable once taken
+      remaining.push({ course_id: courseId, title: course.title, status: "reachable" });
+    } else {
+      blocked.push({ course_id: courseId, title: course.title, missing_prereqs: missingPrereqs });
+    }
+  });
+  
+  const relevantCompleted = student.completed_courses.filter(cid => path.includes(cid));
+
+
+  const result = {
+    ok: true,
+    student_id,
+    student_name: student.name,
+    degree,
+    track,
+    relevant_completed_count: relevantCompleted.length,
+    remaining_reachable: remaining,
+    blocked: blocked,
+    feasible: blocked.length === 0,
+  };
+
+  await logEvent("agent", `Checked feasibility for ${student.name} (${student_id}) on ${degree} / ${track}: ${result.feasible ? "fully feasible" : blocked.length + " course(s) blocked"}`);
+
+  return result;
+}
+
+async function askAdvisorNote(course_id, text) {
+  const response = await fetch("/api/notes/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: CURRENT_USER_ID, course_id, text })
+  });
+  const result = await response.json();
+  if (result.ok) {
+    await refreshNotesDisplay();
+  }
+  return result;
+}
+
+async function comparePaths(degree_a, track_a, degree_b, track_b) {
+  const summarize = (degree, track) => {
+    const courses = getPathCourses(degree, track);
+    const credits = getPathCredits(degree, track);
+    return { degree, track, courses, total_credits: credits };
+  };
+
+  const result = {
+    ok: true,
+    path_a: summarize(degree_a, track_a),
+    path_b: summarize(degree_b, track_b),
+  };
+
+  await logEvent("agent", `Compared paths: ${degree_a} (${track_a || "core only"}) vs ${degree_b} (${track_b || "core only"})`);
+  return result;
+}
+
+// ---------------------------------------------------------------
+// WebMCP registration. This is the part that makes the functions
+// above callable by a visiting agent, not just by this page's own
+// buttons. Guarded, since navigator.modelContext is not yet
+// broadly supported outside agent-enabled browsers (e.g. Chrome
+// with the WebMCP flag, or ChatGPT's in-app browser).
+// ---------------------------------------------------------------
+
+function registerWebMCPTools() {
+  // Spec moved the canonical location from navigator.modelContext to
+  // document.modelContext (May 27, 2026 change; Chrome 150+ deprecates
+  // the navigator alias). Check both, prefer document.
+  const modelContext = document.modelContext || navigator.modelContext;
+
+  if (!modelContext) {
+    document.getElementById("status").textContent = "WebMCP not detected in this browser — you can still browse and add courses manually below.";
+    document.getElementById("status").className = "status off";
+    return;
+  }
+
+  document.getElementById("status").textContent = "WebMCP detected — tools registered, agent can act on this page.";
+  document.getElementById("status").className = "status ok";
+
+  //add_to_plan
+  modelContext.registerTool({
+    name: "add_to_plan",
+    description: "Add a course to the student's current plan by its course_id.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        course_id: { type: "string", description: "e.g. 'CS310'" }
+      },
+      required: ["course_id"]
+    },
+    execute: async ({ course_id }) => addToPlan(course_id, "agent")
+  });
+ 
+  //remove_from_plan
+  modelContext.registerTool({
+    name: "remove_from_plan",
+    description: "Remove a course from the student's current plan by its course_id.",
+    inputSchema: {
+      type: "object",
+      properties: { course_id: { type: "string" } },
+      required: ["course_id"]
+    },
+    execute: async ({ course_id }) => removeFromPlan(course_id, "agent")
+  });
+  
+
+  //check_prerequisites
+  modelContext.registerTool({
+    name: "check_prerequisites",
+    description: "Check whether the prerequisites for a course are satisfied by the student's current plan.",
+    inputSchema: {
+      type: "object",
+      properties: { course_id: { type: "string" } },
+      required: ["course_id"]
+    },
+    execute: async ({ course_id }) => checkPrerequisites(course_id)
+  });
+  
+  //flag_conflict
+  modelContext.registerTool({
+    name: "flag_conflict",
+    description: "Flag a conflict between two courses (e.g. schedule overlap or prerequisite issue), visible to the student as an agent-authored note.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        course_id_a: { type: "string" },
+        course_id_b: { type: "string" },
+        reason: { type: "string" }
+      },
+      required: ["course_id_a", "course_id_b", "reason"]
+    },
+    execute: async ({ course_id_a, course_id_b, reason }) => flagConflict(course_id_a, course_id_b, reason)
+  });
+  
+  //check_feasibility
+  modelContext.registerTool({
+  name: "check_feasibility",
+  description: "Check whether a student can feasibly complete a given degree/track path based on their current transcript, identifying any courses whose prerequisites aren't yet satisfied.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      student_id: { type: "string", description: "e.g. 'student_001'" },
+      degree: { type: "string", description: "e.g. 'BSc Data Science'" },
+      track: { type: "string", description: "e.g. 'Machine Learning' — optional, omit for core only" }
+    },
+    required: ["student_id", "degree"]
+  },
+  execute: async ({ student_id, degree, track }) => checkFeasibility(student_id, degree, track)
+});
+  
+//ask_advisor_note
+  modelContext.registerTool({
+    name: "ask_advisor_note",
+    description: "Leave an advisor-style note on a specific course, visible in the plan under the agent's own identity.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        course_id: { type: "string" },
+        text: { type: "string" }
+      },
+      required: ["course_id", "text"]
+    },
+    execute: async ({ course_id, text }) => askAdvisorNote(course_id, text)
+  });
+
+  //compare_paths
+ modelContext.registerTool({
+  name: "compare_paths",
+  description: "Compare two degree/track paths by total credits and course composition. Omit track to compare only core curriculum.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      degree_a: { type: "string", description: "e.g. 'BSc Data Science'" },
+      track_a: { type: "string", description: "e.g. 'Machine Learning' — optional" },
+      degree_b: { type: "string" },
+      track_b: { type: "string" }
+    },
+    required: ["degree_a", "degree_b"]
+  },
+  execute: async ({ degree_a, track_a, degree_b, track_b }) => comparePaths(degree_a, track_a, degree_b, track_b)
+});
+}
+
+// Wires up the catalog browser (degree/track dropdowns + course
+// list) and initial data load. The same functions here are called
+// either by a human clicking, or by an agent via a registered
+// WebMCP tool — see registerWebMCPTools() above.
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOMContentLoaded fired")
+  registerWebMCPTools();
+  populateDegreeDropdown();
+  refreshPlanDisplay();
+  refreshNotesDisplay();
+  refreshLogDisplay();
+
+  document.getElementById("degreeSelect").addEventListener("change", (e) => {
+    populateTrackDropdown(e.target.value);
+    renderCatalogBrowser();
+  });
+
+  document.getElementById("trackSelect").addEventListener("change", renderCatalogBrowser);
+
+
+
+});
+
+// Expose for console testing
+window.addToPlan = addToPlan;
+window.removeFromPlan = removeFromPlan;
+window.checkPrerequisites = checkPrerequisites;
+window.flagConflict = flagConflict;
+window.askAdvisorNote = askAdvisorNote;
+window.comparePaths = comparePaths;
+window.checkFeasibility = checkFeasibility;
+
+
+</script>
+
+</body>
+</html>

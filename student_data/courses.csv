@@ -1,0 +1,81 @@
+course_id,title,credits,degree_id,track_id,level
+CS101,Introduction to Programming,4,cs,,core_year1
+MATH101,Discrete Mathematics,4,cs,,core_year1
+CS110,Computer Systems Fundamentals,4,cs,,core_year1
+WRIT101,Academic Writing,3,cs,,core_year1
+CS201,Data Structures & Algorithms,4,cs,,core_year2
+CS210,Computer Architecture,4,cs,,core_year2
+CS220,Databases,4,cs,,core_year2
+MATH201,Linear Algebra,3,cs,,core_year2
+CS310,Software Design & Architecture,4,cs,cs_swe,track
+CS320,Distributed Systems,4,cs,cs_swe,track
+CS330,DevOps & Cloud Deployment,3,cs,cs_swe,track
+CS401_SWE,Capstone: Software Engineering,5,cs,cs_swe,track
+CS315,Machine Learning Fundamentals,4,cs,cs_ai,track
+CS325,Neural Networks & Deep Learning,4,cs,cs_ai,track
+CS335,Agentic & Multi-Agent Systems,3,cs,cs_ai,track
+CS401_AI,Capstone: Artificial Intelligence,5,cs,cs_ai,track
+CS101,Introduction to Programming,4,ds,,core_year1
+STAT101,Introduction to Statistics,4,ds,,core_year1
+MATH101,Discrete Mathematics,4,ds,,core_year1
+WRIT101,Academic Writing,3,ds,,core_year1
+CS201,Data Structures & Algorithms,4,ds,,core_year2
+STAT201,Probability & Statistical Inference,4,ds,,core_year2
+DS210,Data Wrangling & ETL,3,ds,,core_year2
+MATH201,Linear Algebra,3,ds,,core_year2
+DS310,Machine Learning Fundamentals,4,ds,ds_ml,track
+DS320,Deep Learning,4,ds,ds_ml,track
+DS330,Model Evaluation & MLOps,3,ds,ds_ml,track
+DS401_ML,Capstone: Machine Learning,5,ds,ds_ml,track
+DS315,Data Pipeline Engineering,4,ds,ds_de,track
+DS325,Distributed Data Systems,4,ds,ds_de,track
+DS335,Cloud Data Platforms,3,ds,ds_de,track
+DS401_DE,Capstone: Data Engineering,5,ds,ds_de,track
+BUS101,Principles of Management,3,bus,,core_year1
+ECON101,Microeconomics,3,bus,,core_year1
+STAT101,Introduction to Statistics,4,bus,,core_year1
+WRIT101,Academic Writing,3,bus,,core_year1
+BUS201,Financial Accounting,4,bus,,core_year2
+ECON201,Macroeconomics,3,bus,,core_year2
+BUS210,Organizational Behavior,3,bus,,core_year2
+STAT201,Business Statistics,3,bus,,core_year2
+BUS310,Marketing Fundamentals,3,bus,bus_mkt,track
+BUS320,Consumer Analytics,4,bus,bus_mkt,track
+BUS330,Digital & Growth Marketing,3,bus,bus_mkt,track
+BUS401_MKT,Capstone: Marketing Analytics,5,bus,bus_mkt,track
+BUS315,Corporate Finance,4,bus,bus_fin,track
+BUS325,Investment Analysis,4,bus,bus_fin,track
+BUS340,Risk & Portfolio Management,3,bus,bus_fin,track
+BUS401_FIN,Capstone: Finance,5,bus,bus_fin,track
+PSY101,Introduction to Psychology,4,psych,,core_year1
+STAT101,Introduction to Statistics,4,psych,,core_year1
+BIO101,Introduction to Biology,3,psych,,core_year1
+WRIT101,Academic Writing,3,psych,,core_year1
+PSY201,Research Methods in Psychology,4,psych,,core_year2
+PSY210,Developmental Psychology,3,psych,,core_year2
+PSY220,Biological Psychology,3,psych,,core_year2
+STAT201,Statistical Methods for Behavioral Science,3,psych,,core_year2
+PSY310,Abnormal Psychology,4,psych,psych_clin,track
+PSY320,Clinical Assessment,4,psych,psych_clin,track
+PSY330,Foundations of Psychotherapy,3,psych,psych_clin,track
+PSY401_CLIN,Capstone: Clinical Psychology,5,psych,psych_clin,track
+PSY315,Cognitive Psychology,4,psych,psych_cog,track
+PSY325,Perception & Attention,3,psych,psych_cog,track
+PSY335,Computational Models of Cognition,4,psych,psych_cog,track
+PSY401_COG,Capstone: Cognitive Science,5,psych,psych_cog,track
+BIO101,Introduction to Biology,4,bio,,core_year1
+CHEM101,General Chemistry,4,bio,,core_year1
+STAT101,Introduction to Statistics,3,bio,,core_year1
+WRIT101,Academic Writing,3,bio,,core_year1
+BIO201,Genetics,4,bio,,core_year2
+BIO210,Cell Biology,4,bio,,core_year2
+CHEM201,Organic Chemistry,4,bio,,core_year2
+BIO220,Evolutionary Biology,3,bio,,core_year2
+BIO310,Molecular Biology,4,bio,bio_mol,track
+BIO320,Biochemistry,4,bio,bio_mol,track
+BIO330,Genomics,3,bio,bio_mol,track
+BIO401_MOL,Capstone: Molecular Biology,5,bio,bio_mol,track
+BIO315,Ecology,4,bio,bio_eco,track
+BIO325,Conservation Biology,3,bio,bio_eco,track
+BIO340,Environmental Science & Policy,3,bio,bio_eco,track
+BIO401_ECO,Capstone: Ecology & Environmental Science,5,bio,bio_eco,track
