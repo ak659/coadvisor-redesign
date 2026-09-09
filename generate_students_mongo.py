@@ -1,31 +1,43 @@
 """
-generate_students.py  (PostgreSQL version)
+generate_students.py
 ------------------------------------------------------------------
-Same persona-weighted generation logic as before. Writes to
-PostgreSQL via db.py's insert_student()/clear_students() instead of
-raw pymongo or sqlite3 calls -- keeps this script decoupled from
-whatever database db.py happens to be backed by.
+Generates synthetic upperclassman students with plausible academic
+transcripts, respecting real prerequisite chains from the catalog
+(no impossible transcripts -- a student never has a course without
+having completed its prerequisites first).
 
-Reads catalog CSVs from ./student_data/.
+Personas control how "far along" and how successful a student's
+progression looks, so later clustering/feasibility-checking has
+genuine sub-populations to find, not uniform noise:
+  - fast_track:      ahead of pace, high grades, early track selection
+  - at_risk:          behind pace, lower grades, incomplete progression
+  - track_switcher:   partial progress in one track, then pivoted
+  - average:          the bulk of the population, steady normal pace
+
+Writes directly to MongoDB (students collection), reading the
+connection string from the MONGODB_URI environment variable --
+same pattern as db.py.
 
 Run with:
+    $env:MONGODB_URI = "mongodb+srv://..."   (PowerShell)
     python generate_students.py
 ------------------------------------------------------------------
 """
 
+import os
 import random
 from pathlib import Path
 
 import pandas as pd
 from faker import Faker
-
-import db  # the PostgreSQL version
+from pymongo import MongoClient
 
 fake = Faker()
-fake.seed_instance(42)
-random.seed(42)
+random.seed(42)  # reproducible while iterating; remove/change seed for fresh runs
 
 DATA_DIR = Path(__file__).parent / "student_data"
+MONGODB_URI = os.environ.get("MONGODB_URI", "mongodb://localhost:27017")
+DB_NAME = os.environ.get("MONGODB_DB_NAME", "course_compass")
 
 N_STUDENTS = 40
 
@@ -181,12 +193,13 @@ def main():
     print(f"Average courses completed per student: {avg_completed:.1f}")
     print("All transcripts validated -- no student has a course without its prerequisites.")
 
-    conn = db.get_client()
-    db.init_db(conn)
-    db.clear_students(conn)
-    for s in students:
-        db.insert_student(conn, s)
-    print(f"Inserted {len(students)} students into PostgreSQL")
+    client = MongoClient(MONGODB_URI)
+    db = client[DB_NAME]
+    db.students.delete_many({})
+    db.students.insert_many(students)
+    db.students.create_index("student_id", unique=True)
+    print(f"Inserted {len(students)} students into {DB_NAME}.students")
+    client.close()
 
 
 if __name__ == "__main__":
